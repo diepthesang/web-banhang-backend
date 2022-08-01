@@ -1,4 +1,5 @@
 const db = require("./src/db/models")
+const { getAllProductByName } = require("./src/services/user.services")
 
 
 let makedata = () => {
@@ -116,4 +117,4 @@ let makeCate = () => {
 }
 
 
-makeCate()
+getAllProductByName('11').then(data => console.log(data)).catch(err => console.log(err))

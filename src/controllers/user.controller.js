@@ -1,4 +1,4 @@
-const { getAllProduct, getAllCategory, getProductById } = require("../services/user.services")
+const { getAllProduct, getAllCategory, getProductById, getAllProductByCateId, getAllProductByName } = require("../services/user.services")
 
 
 module.exports = {
@@ -25,16 +25,48 @@ module.exports = {
         }
     },
     getProductById: async (req, res, next) => {
+        let proId = req.params.id
+        console.log(proId);
         try {
-            let data = await getProductById()
+            let data = await getProductById(proId)
             return res.status(200).json(data);
         } catch (error) {
             return res.status(500).json({
                 errCode: 1,
-                message: 'error get all product by id'
+                message: 'error get  product by id'
             })
         }
+    },
+
+    getAllProductByCateId: async (req, res, next) => {
+        let cateId = req.params.id
+        console.log(cateId);
+        try {
+            let data = await getAllProductByCateId(cateId);
+            return res.status(200).json(data);
+        } catch (error) {
+            return res.status(500).json({
+                errCode: 1,
+                message: 'error get all product by cateId'
+            })
+        }
+    },
+    getAllProductByName: async (req, res, next) => {
+        let search = req.params.search
+        console.log(search)
+        try {
+            let data = await getAllProductByName(search)
+            return res.status(200).json(data)
+        } catch (error) {
+            return res.status(500).json(
+                {
+                    errCode: 1,
+                    message: 'error get all product by search name'
+                }
+            )
+        }
     }
+
 
 
 }

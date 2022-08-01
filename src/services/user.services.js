@@ -1,4 +1,6 @@
 
+
+const { Op } = require("sequelize")
 const db = require("../db/models")
 
 module.exports = {
@@ -21,12 +23,12 @@ module.exports = {
         }
     },
 
-    getProductById: async () => {
+    getProductById: async (proId) => {
         try {
             return await db.Product.findAll(
                 {
                     where: {
-                        id: 1
+                        id: proId
                     }
                 }
             )
@@ -35,7 +37,45 @@ module.exports = {
                 message: "error services"
             }
         }
+    },
+
+    getAllProductByCateId: async (cateId) => {
+        try {
+            return await db.Product.findAll(
+                {
+                    where: {
+                        cateId: cateId
+                    }
+                }
+            )
+        } catch (error) {
+            return {
+                message: 'error services'
+            }
+        }
+    },
+
+    getAllProductByName: async (search) => {
+        try {
+            return await db.Product.findAll(
+                {
+                    where: {
+                        name: { [Op.substring]: `%${search}` },
+                    },
+                }
+
+            )
+        } catch (error) {
+            return {
+                message: 'error services'
+            }
+        }
     }
+
 }
+
+
+
+
 
 
