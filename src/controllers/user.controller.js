@@ -1,4 +1,4 @@
-const { getAllProduct, getAllCategory, getProductById, getAllProductByCateId, getAllProductByName } = require("../services/user.services")
+const { getAllProduct, getAllCategory, getProductById, getAllProductByCateId, getAllProductByName, setProductForCart, getProductByProductIdInCart, updateAmountProductInCart, checkout, deleteProductInCart, getAllProductInCart } = require("../services/user.services")
 
 
 module.exports = {
@@ -62,6 +62,75 @@ module.exports = {
                 {
                     errCode: 1,
                     message: 'error get all product by search name'
+                }
+            )
+        }
+    },
+
+    setProductForCart: async (req, res, next) => {
+        let { productId, name, price, amount, userId } = req.params
+
+
+        let product = await getProductByProductIdInCart(productId)
+
+        if (!product && amount !== '0') {
+            await setProductForCart(productId, name, price, amount, userId);
+            return res.status(200).json(
+                {
+                    message: `ban da them ${productId} vao gio hang`
+                }
+            )
+        } else {
+
+            if (amount === '0') {
+                await deleteProductInCart(productId)
+                return res.status(200).json(
+                    {
+                        message: `ban da xoa san pham ${productId} thanh cong`
+                    }
+                )
+            }
+
+            // let orderId = await product.orderId
+            await updateAmountProductInCart(amount, productId)
+            return res.status(200).json(
+                {
+                    message: `trong gio hàng hiện đang có ${amount} ${name}`
+                }
+            )
+        }
+
+    },
+
+    checkout: async (req, res, next) => {
+        try {
+            let { userId } = req.params;
+            console.log(userId);
+            await checkout(userId)
+            return res.status(200).json(
+                {
+                    message: 'checkout thanh cong'
+                }
+            )
+        } catch (error) {
+
+        }
+    },
+
+    getAllProductInCart: async (req, res, next) => {
+        let { userId } = req.params
+        console.log(userId);
+        let allProduct = await getAllProductInCart(userId)
+
+        try {
+            return res.status(200).json(
+                allProduct
+            )
+        } catch (error) {
+            return res.status(500).json(
+                {
+                    errCode: 1,
+                    message: 'err get all product in cart'
                 }
             )
         }
