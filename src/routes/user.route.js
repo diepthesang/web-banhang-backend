@@ -1,5 +1,7 @@
 const express = require('express');
-const { getAllProduct, getAllCategory, getProductById, getAllProductByCateId, getAllProductByName, setProductForCart, checkout, getAllProductInCart } = require('../controllers/user.controller');
+const passport = require('passport');
+const passportConfig = require('../middelware/passport.middleware')
+const { getAllProduct, getAllCategory, getProductById, getAllProductByCateId, getAllProductByName, setProductForCart, checkout, getAllProductInCart, updateAmountProductInCart, getTotalAmountInCart, setInfoCheckout } = require('../controllers/user.controller');
 const route = express.Router()
 
 
@@ -8,9 +10,12 @@ route.get('/category', getAllCategory)
 route.get('/product/:id', getProductById)
 route.get('/category/:id', getAllProductByCateId)
 route.get('/searchProduct/:search', getAllProductByName)
-route.get('/cart/:productId/:name/:price/:amount/:userId', setProductForCart)
-route.get('/checkout/:userId', checkout)
-route.get('/allProductCart/:userId', getAllProductInCart)
+route.post('/setProductCart', passport.authenticate('jwt', { session: false }), setProductForCart)
+// route.get('/checkout/:userId', checkout)
+route.get('/allProductCart', passport.authenticate('jwt', { session: false }), getAllProductInCart)
+route.get('/updateAmountProductInCart/:productId/:amount', passport.authenticate('jwt', { session: false }), updateAmountProductInCart)
+route.get('/totalAmount', passport.authenticate('jwt', { session: false }), getTotalAmountInCart)
+route.post('/checkout', passport.authenticate('jwt', { session: false }), checkout, setInfoCheckout)
 
 
 module.exports = route

@@ -3,6 +3,9 @@ const JWT = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 require('dotenv').config()
 
+
+
+
 module.exports = {
 
     registerAccount: async (req, res, next) => {
@@ -13,6 +16,7 @@ module.exports = {
             if (!username || !email || !password || !confirmPassword) {
                 return res.status(200).json(
                     {
+                        errCode: 1,
                         message: 'ban fai dien day du thong tin'
                     }
                 )
@@ -25,7 +29,7 @@ module.exports = {
             if (checkExistUsername) {
                 return res.status(200).json(
                     {
-                        errCode: 1,
+                        errCode: 2,
                         message: ' username is existed!'
                     }
                 )
@@ -33,8 +37,8 @@ module.exports = {
             if (checkExistEmail) {
                 return res.status(200).json(
                     {
-                        errCode: 1,
-                        message: ' email is existed!'
+                        errCode: 3,
+                        message: 'email is existed!'
                     }
                 )
             }
@@ -44,11 +48,12 @@ module.exports = {
                 if (password === confirmPassword) {
                     await registerAccount(username, email, password);
                     res.status(200).json({
+                        errCode: 4,
                         message: 'create account successfully'
                     })
                 } else {
                     res.json({
-                        errCode: 1,
+                        errCode: 5,
                         message: 'password is not confirm'
                     })
                 }
@@ -67,6 +72,7 @@ module.exports = {
         console.log(username);
         if (!username && !password) {
             return res.status(200).json({
+                errCode: 1,
                 message: 'ban can fai dien day du thong tin'
             })
         }
@@ -75,6 +81,7 @@ module.exports = {
 
         if (!checkExistUsername) {
             return res.status(200).json({
+                errCode: 2,
                 message: 'tai khoan khong ton tai'
             })
         }
@@ -87,9 +94,16 @@ module.exports = {
                     if (result) {
                         console.log(token);
                         res.setHeader('Authorization', 'Bearer ' + token)
-                        return res.status(200).json('dang nhap thanh cong')
+                        return res.status(200).json({
+                            errCode: 4,
+                            message: 'Login thành công'
+                        })
+
                     } else {
-                        return res.json('mat khau sai')
+                        return res.status(200).json({
+                            errCode: 3,
+                            message: 'mat khau sai'
+                        })
                     }
                 } catch (error) {
                     return res.json(err)
@@ -98,7 +112,8 @@ module.exports = {
 
         }
 
-    }
+    },
+
 }
 
 
@@ -111,7 +126,8 @@ let encodeToken = (userId) => {
         },
         process.env.JWT_SECRETKEY,
         {
-            expiresIn: 60 * 2
+            expiresIn: 60 * 60 * 12
         }
     )
+
 }

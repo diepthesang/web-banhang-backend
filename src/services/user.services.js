@@ -4,6 +4,7 @@ const { Op } = require("sequelize")
 const db = require("../db/models")
 const { v4: uuidv4 } = require('uuid');
 var _ = require('lodash');
+const product = require("../db/models/product");
 
 module.exports = {
     getAllProduct: async () => {
@@ -74,7 +75,7 @@ module.exports = {
         }
     },
 
-    setProductForCart: async (productId, name, price, amount, userId) => {
+    setProductForCart: async (productId, name, price, img, amount, userId) => {
 
         try {
             await db.Cart.create(
@@ -82,9 +83,10 @@ module.exports = {
                     productId: productId,
                     name: name,
                     price: price,
+                    img: img,
                     amount: amount,
                     total: price * amount,
-                    userId: userId
+                    userId: userId,
 
                 }
             )
@@ -94,16 +96,32 @@ module.exports = {
             }
         }
     },
-    updateAmountProductInCart: async (amount, productId) => {
+    updateAmountProductInCart: async (productId, amount, userId) => {
         try {
+            let getProduct = await db.Cart.findOne(
+                {
+                    where: {
+                        productId: productId,
+                        orderId: null,
+                        userId: userId
+                    }
+
+                }
+            )
+            let priceById = getProduct.price
+            console.log('>>>><<<<');
+            console.log(priceById);
+
             await db.Cart.update(
                 {
-                    amount: amount
+                    amount: amount,
+                    total: amount * priceById
                 },
                 {
                     where: {
                         productId: productId,
-                        orderId: null
+                        orderId: null,
+                        userId: userId
                     }
                 }
             )
@@ -113,11 +131,12 @@ module.exports = {
             }
         }
     },
-    getProductByProductIdInCart: async (productId) => {
+    getProductByProductIdInCart: async (userId, productId) => {
         try {
             return await db.Cart.findOne(
                 {
                     where: {
+                        userId: userId,
                         productId: productId,
                         orderId: null
                     }
@@ -141,29 +160,51 @@ module.exports = {
             }
         )
         let arrProductId = _.map(getAllProductId, 'productId')
+        let orderId = uuidv4()
         console.log(arrProductId);
         try {
-            db.Cart.update(
+            await db.Cart.update(
                 {
-                    orderId: uuidv4()
+                    orderId: orderId,
                 },
                 {
                     where: {
-                        productId: arrProductId
+                        userId: userId,
+                        productId: arrProductId,
+                        orderId: null,
                     }
                 }
             )
+            return orderId;
         } catch (error) {
 
         }
     },
-    deleteProductInCart: async (productId) => {
+    getOrderId: async (userId, orderId) => {
+        try {
+            let product = await db.Cart.findAll(
+                {
+                    where: {
+                        userId: userId,
+                        orderId: orderId,
+                    }
+                }
+            )
+            let orderId = product.orderId;
+            return orderId;
+        } catch (error) {
+
+        }
+    },
+
+    deleteProductInCart: async (productId, userId) => {
         try {
             await db.Cart.destroy(
                 {
                     where: {
                         productId: productId,
-                        orderId: null
+                        orderId: null,
+                        userId: userId
                     }
                 }
             )
@@ -185,6 +226,27 @@ module.exports = {
         } catch (error) {
             return {
                 message: 'error service, giõ hàng trống'
+            }
+        }
+    },
+    setInfoCheckout: async (userId, firstname, lastname, phoneNumber, address, city, country, orderId) => {
+
+        try {
+            await db.Checkout.create(
+                {
+                    userId: userId,
+                    firstname: firstname,
+                    lastname: lastname,
+                    phoneNumber: phoneNumber,
+                    address: address,
+                    city: city,
+                    country: country,
+                    orderId: orderId,
+                }
+            )
+        } catch (error) {
+            return {
+                message: 'err service'
             }
         }
     }
